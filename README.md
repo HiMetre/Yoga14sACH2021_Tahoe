@@ -85,7 +85,7 @@ SimpleHDA 与 AirportItlwm-Tahoe 限定 Darwin 25.x。SimpleHDA 位于 Lilu、Ap
 
 - 内屏名称：把 `PostInstall/DisplayOverride/` 复制到 `/Library/Displays/Contents/Resources/Overrides/`。名称 `Yoga 14s 2.8K (CSOT MNE007ZA1-1)`。EDID 三原色和白点与 sRGB 一致，颜色描述用默认或 sRGB IEC61966-2.1。
 - 电源：`pmset -a` 为 `powernap 0`、`tcpkeepalive 0`、`proximitywake 0`、`standby 0`、`hibernatemode 0`。睡眠期间“查找我的 Mac”不可用。
-- 性能模式面板：[YogaControl](../YogaControl/README.md)，安装于 `/Applications/YogaControl.app`。原版 YogaSMCNC 与偏好面板已卸载。
+- 性能模式面板：[YogaControl](https://github.com/HiMetre/YogaControl)，安装于 `/Applications/YogaControl.app`。原版 YogaSMCNC 与偏好面板已卸载。
 - `PostInstall/SimpleHDA-HAL-1.0.0.pkg` 未安装。插件为 ad-hoc 签名，与开启 library-validation 的豆包输入法冲突。
 
 检查：
