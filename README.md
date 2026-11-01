@@ -55,7 +55,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | 性能模式功耗 | 正常 | DYTC rev 5。短时满载：安静约 12 W / 1.5 GHz，均衡约 24 W / 2.7 GHz，性能约 40 W / 3.7 GHz。机身热透后性能模式持续约 32–36 W / 2.4–2.7 GHz（约 86 °C）。封装功耗含核显 |
 | USB | 正常 | XHC0 / XHC1 原生枚举，未使用 USBMap |
 | 摄像头 | 正常 | 系统自带 USB 视频 |
-| 睡眠 | 部分 | `hibernatemode 0`，只做内存睡眠。休眠到磁盘后再唤醒的固件映射未改 |
+| 睡眠 | 内存睡眠 | `hibernatemode 0`。扩展坞保持插入时，`SSDT-GPRW` 挡住 GPE `0x19` 的唤醒，见 3.9。休眠到磁盘后再唤醒的固件映射未改 |
 | 内置 NVMe | 可用，速率不足 | Fanxiang 能启动。链路停在 5.0 GT/s x4，见 3.5 |
 | 有线网 | 无此硬件 | `NullEthernet` 与 `SSDT-RMNE` 关闭，AX200 作为 `en0` |
 
@@ -63,7 +63,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 
 ### 1.3 加载项
 
-ACPI 正在加载：`SSDT-XOSI`、`SSDT-ALS0`、`SSDT-EC`、`SSDT-PLUG-ALT`、`SSDT-PNLF`（`GP17.VGA`）、`SSDT-USBX`。`SSDT-RMNE` 不加载。
+ACPI 正在加载：`SSDT-XOSI`、`SSDT-ALS0`、`SSDT-EC`、`SSDT-PLUG-ALT`、`SSDT-PNLF`（`GP17.VGA`）、`SSDT-USBX`、`SSDT-GPRW`。`SSDT-RMNE` 不加载。
 
 DeviceProperties：`PciRoot(0x1)/Pci(0x8,0x1)/Pci(0x0,0x6)` 的 `layout-id = 13`，`Pci(0x0,0x5)` 的 `external-audio`。`\_SB.PCI0` 的 `_UID` 为 1，所以路径是 `PciRoot(0x1)`。日志和 Windows 里的 `PciRoot(0x0)` 是固件编号，不能写入 DeviceProperties。内置盘插槽 `PciRoot(0x1)/Pci(0x2,0x4)/Pci(0x0,0x0)` 上无注入属性。
 
@@ -84,7 +84,7 @@ SimpleHDA 与 AirportItlwm-Tahoe 限定 Darwin 25.x。SimpleHDA 位于 Lilu、Ap
 系统侧（不在 EFI 内，重装后需重做）：
 
 - 内屏名称：把 `PostInstall/DisplayOverride/` 复制到 `/Library/Displays/Contents/Resources/Overrides/`。名称 `Yoga 14s 2.8K (CSOT MNE007ZA1-1)`。EDID 三原色和白点与 sRGB 一致，颜色描述用默认或 sRGB IEC61966-2.1。
-- 电源：`pmset -a` 为 `powernap 0`、`tcpkeepalive 0`、`proximitywake 0`、`standby 0`、`hibernatemode 0`。睡眠期间“查找我的 Mac”不可用。
+- 电源：`pmset -a` 为 `powernap 0`、`tcpkeepalive 0`、`proximitywake 0`、`standby 0`、`hibernatemode 0`，交流电源 `womp 0`。睡眠期间“查找我的 Mac”不可用。
 - 性能模式面板：[YogaControl](https://github.com/HiMetre/YogaControl)，安装于 `/Applications/YogaControl.app`。原版 YogaSMCNC 与偏好面板已卸载。
 - `PostInstall/SimpleHDA-HAL-1.0.0.pkg` 未安装。插件为 ad-hoc 签名，与开启 library-validation 的豆包输入法冲突。
 
@@ -220,6 +220,14 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 | ACPI | DSDT 的 EC 在 `\_SB.PCI0.LPC0.EC0`，没有 `LPCB`、`H_EC`、`HKEY`，也没有 `_BIX` | 不加载 `SSDT-BATS`、`SSDT-THINK`、`SSDT-ECRW`、`SSDT-RCSM`、`SSDT-YVPC`、`SSDT-PS2FN`、`SSDT-HPET`、`SSDT-PNLF1`，以及对应重命名和 IRQ 补丁。电池使用原生 `_BIF` / `_BST` | 只适用于这份 DSDT |
 | `npci=0x2000` | 该参数禁止 64 位 PCI 窗口。核显与 XHC 在 `GP17`（00:08.1）下、地址在 4 GB 以上 | 删除 | 4 GB 以上的核显或 USB 控制器都应去掉 |
 | 虚拟网卡 | 本机没有网口。虚拟网卡地址与 AX200 相同时接口不起 | 关闭 `NullEthernet.kext` 与 `SSDT-RMNE`，AX200 作为 `en0` | 无内置网口、且无线应作为 `en0` 的机器同样适用 |
+
+### 3.9 扩展坞把合盖睡眠反复唤醒，随后整机冻结
+
+**根因。** `GP17`、`XHC0`、`XHC1` 的 `acpi-wake-gpe` 都是 25（`0x19`）。`LID` 不用这个 GPE。扩展坞（威盛 USB 集线器、ASIX AX88179A、Fresco Logic Billboard、罗技接收器）挂在这组控制器上。2026-11-01 合盖后，机器约每 4 分钟被 `GP17 / XHC0 / XHC1` 暗唤醒一次，连续 13 次。13:39:18 那次唤醒没有完成：`XHC1` 返回 `kIOReturnNotAttached`（`0xe00002d8`），电源切换停在 `PM waiting on pmDriverCallout to VoodooI2CHIDDevice`（ELAN 触摸板 `04F3:317C`）。没有内核恐慌。当时 `hibernatemode` 已是 0，不是休眠到磁盘那条路径。15:48 强制重启。
+
+**改动。** 加载 `SSDT-GPRW.aml`（源文件 `SSDT-GPRW.dsl`）。`ACPI → Patch` 把 DSDT 里 `Method (GPRW, 2, NotSerialized)` 改名为 `XPRW`：Find `47 50 52 57 02`，Replace `58 50 52 57 02`，`Count = 1`，`TableSignature = DSDT`。新的 `GPRW` 在参数为 `0x19` 时返回 `Package { 0x19, 0 }`，这三处设备不再从 S3 唤醒；其他 GPE 仍调用原来的 `XPRW`。扩展坞可以保持插入。交流电源另设 `womp 0`，避免 AX88179A 的网络唤醒。开盖和电源键不走 GPE `0x19`。
+
+**是否通用。** 只适用于唤醒 GPE 为 `0x19`、且 DSDT 使用未序列化两参数 `GPRW` 的机器。GPE 不同就要改 `SSDT-GPRW.dsl` 里的 `0x19` 并重新编译。OpenCore 日志里这条补丁的 Count 变为 0 时，说明方法标志不是 `02`，补丁没有生效。
 
 ## 目录
 
