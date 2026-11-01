@@ -6,7 +6,7 @@
 
 基于 macOS Tahoe **26.7.1**，已正常升级到 **26.7.2**。
 
-OpenCore **1.0.8 RELEASE**。BIOS 为 GZCN27WW：已包含 32 GB 内存支持，此 BIOS 不支持升级。配置文件为 `EFI/OC/config.plist`。
+OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升级；该固件包含 32 GB 内存支持。本机 32 GB 为硬改内存，原厂为 16 GB。此配置理论上适用于 16 GB 原版。配置文件为 `EFI/OC/config.plist`。
 
 ## 1. 当前配置与硬件状态
 
