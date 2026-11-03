@@ -64,11 +64,11 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>SSDT-GPRW.aml — GPE 0x19 wake level 0, dock stays asleep</string>
+				<string>SSDT-XHCW.aml — drop XHC/GP17 wake, clear PME in _PTS</string>
 				<key>Enabled</key>
 				<true/>
 				<key>Path</key>
-				<string>SSDT-GPRW.aml</string>
+				<string>SSDT-XHCW.aml</string>
 			</dict>
 		</array>
 		<key>Delete</key>
@@ -120,14 +120,14 @@
 				<key>BaseSkip</key>
 				<integer>0</integer>
 				<key>Comment</key>
-				<string>GPRW to XPRW / SSDT-GPRW.aml keeps GPE 0x19 from waking S3</string>
+				<string>_PTS to ZPTS / SSDT-XHCW.aml clears XHC PME after firmware _PTS</string>
 				<key>Count</key>
 				<integer>1</integer>
 				<key>Enabled</key>
 				<true/>
 				<key>Find</key>
 				<data>
-				R1BSVwI=
+				X1BUUwE=
 				</data>
 				<key>Limit</key>
 				<integer>0</integer>
@@ -139,7 +139,163 @@
 				</data>
 				<key>Replace</key>
 				<data>
-				WFBSVwI=
+				WlBUUwE=
+				</data>
+				<key>ReplaceMask</key>
+				<data>
+				</data>
+				<key>Skip</key>
+				<integer>0</integer>
+				<key>TableLength</key>
+				<integer>0</integer>
+				<key>TableSignature</key>
+				<data>
+				RFNEVA==
+				</data>
+			</dict>
+			<dict>
+				<key>Base</key>
+				<string></string>
+				<key>BaseSkip</key>
+				<integer>0</integer>
+				<key>Comment</key>
+				<string>_PRW to XPRW where body is Return GPRW(0x19, 0x03) — XHC0/XHC1</string>
+				<key>Count</key>
+				<integer>0</integer>
+				<key>Enabled</key>
+				<true/>
+				<key>Find</key>
+				<data>
+				X1BSVwCkR1BSVwoZCgM=
+				</data>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data>
+				</data>
+				<key>OemTableId</key>
+				<data>
+				</data>
+				<key>Replace</key>
+				<data>
+				WFBSVwCkR1BSVwoZCgM=
+				</data>
+				<key>ReplaceMask</key>
+				<data>
+				</data>
+				<key>Skip</key>
+				<integer>0</integer>
+				<key>TableLength</key>
+				<integer>0</integer>
+				<key>TableSignature</key>
+				<data>
+				RFNEVA==
+				</data>
+			</dict>
+			<dict>
+				<key>Base</key>
+				<string></string>
+				<key>BaseSkip</key>
+				<integer>0</integer>
+				<key>Comment</key>
+				<string>_PRW to XPRW where body is Return GPRW(0x19, 0x04) — XHC0/XHC1</string>
+				<key>Count</key>
+				<integer>0</integer>
+				<key>Enabled</key>
+				<true/>
+				<key>Find</key>
+				<data>
+				X1BSVwCkR1BSVwoZCgQ=
+				</data>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data>
+				</data>
+				<key>OemTableId</key>
+				<data>
+				</data>
+				<key>Replace</key>
+				<data>
+				WFBSVwCkR1BSVwoZCgQ=
+				</data>
+				<key>ReplaceMask</key>
+				<data>
+				</data>
+				<key>Skip</key>
+				<integer>0</integer>
+				<key>TableLength</key>
+				<integer>0</integer>
+				<key>TableSignature</key>
+				<data>
+				RFNEVA==
+				</data>
+			</dict>
+			<dict>
+				<key>Base</key>
+				<string></string>
+				<key>BaseSkip</key>
+				<integer>0</integer>
+				<key>Comment</key>
+				<string>GP17 _PRW to XPRW / If WKPM Return GPRW(0x19, 0x03)</string>
+				<key>Count</key>
+				<integer>1</integer>
+				<key>Enabled</key>
+				<true/>
+				<key>Find</key>
+				<data>
+				X1BSVwCgEJNXS1BNAaRHUFJXChkKAw==
+				</data>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data>
+				</data>
+				<key>OemTableId</key>
+				<data>
+				</data>
+				<key>Replace</key>
+				<data>
+				WFBSVwCgEJNXS1BNAaRHUFJXChkKAw==
+				</data>
+				<key>ReplaceMask</key>
+				<data>
+				</data>
+				<key>Skip</key>
+				<integer>0</integer>
+				<key>TableLength</key>
+				<integer>0</integer>
+				<key>TableSignature</key>
+				<data>
+				RFNEVA==
+				</data>
+			</dict>
+			<dict>
+				<key>Base</key>
+				<string></string>
+				<key>BaseSkip</key>
+				<integer>0</integer>
+				<key>Comment</key>
+				<string>GP17 _PRW to XPRW / If WKPM Return GPRW(0x19, 0x04)</string>
+				<key>Count</key>
+				<integer>1</integer>
+				<key>Enabled</key>
+				<true/>
+				<key>Find</key>
+				<data>
+				X1BSVwCgEJNXS1BNAaRHUFJXChkKBA==
+				</data>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data>
+				</data>
+				<key>OemTableId</key>
+				<data>
+				</data>
+				<key>Replace</key>
+				<data>
+				WFBSVwCgEJNXS1BNAaRHUFJXChkKBA==
 				</data>
 				<key>ReplaceMask</key>
 				<data>
@@ -380,7 +536,7 @@
 				<key>BundlePath</key>
 				<string>NootedRed.kext</string>
 				<key>Comment</key>
-				<string>V0.9.0 | steve12311 0.9.0-pre-release.11 CacheSectionRepair | Cezanne 1638</string>
+				<string>V0.9.0 | steve12311 0.9.0-pre-release.15 RELEASE | Cezanne 1638</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -2026,7 +2182,7 @@
 				<string>keepsyms=1 -FIPeriodic -NRedDisplayFix -NRedVideoFix</string>
 				<key>csr-active-config</key>
 				<data>
-				AwgAAA==
+				QwoAAA==
 				</data>
 				<key>run-efi-updater</key>
 				<string>No</string>
