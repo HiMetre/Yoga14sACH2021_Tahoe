@@ -47,7 +47,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | 外接显示器音频 | 无输出 | 音频设备会建立，链路上没有有效数据。内置扬声器不受影响 |
 | 无线 AX200 | 正常，功能受限 | AirportItlwm-Tahoe。Wi-Fi 6、纯 WPA3、强制 PMF、AirDrop 不可用 |
 | 蓝牙 | 已加载，启动无 panic | IntelBluetoothFirmware / IntelBTPatcher 2.4.0 + BlueToolFixup 2.7.2 |
-| 触摸板 | 正常 | VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput、VoodooI2CHID） |
+| 触摸板 | 正常 | VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput、VoodooI2CHID）。`VoodooInput` 须作为 `VoodooI2C` 的库依赖注入，见 3.9 |
 | 键盘 | 正常 | VoodooPS2Controller 2.3.7。OpenCanopy 超时 3 秒，固件菜单只接受 USB 键盘 |
 | Fn+Q 性能模式 | 正常 | YogaSMC 转发 VPC 事件，YogaControl 接收 |
 | 键盘背光 | 仅硬件键 | Fn+空格。YogaSMC 报告本机不支持软件切换 |
@@ -69,7 +69,7 @@ DeviceProperties：`PciRoot(0x1)/Pci(0x8,0x1)/Pci(0x0,0x6)` 的 `layout-id = 13`
 
 启用的 kext，顺序同 `Kernel → Add`：
 
-Lilu 1.7.2、VirtualSMC / SMCBatteryManager / SMCLightSensor 1.3.8、ForgedInvariant 1.5.0、ECEnabler 1.0.6、AppleMCEReporterDisabler、AMDRyzenCPUPowerManagement 0.7.2、SMCAMDProcessor、NootedRed、NVMeFix 1.1.3、RestrictEvents 1.1.6、VoodooPS2 2.3.7、VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput）、VoodooI2CHID、BrightnessKeys 1.0.3、AppleALC 1.9.8、SimpleHDA 1.0.0、YogaSMC 1.5.3、IntelBluetoothFirmware、IntelBTPatcher、BlueToolFixup 2.7.2、AirportItlwm-Tahoe。
+Lilu 1.7.2、VirtualSMC / SMCBatteryManager / SMCLightSensor 1.3.8、ForgedInvariant 1.5.0、ECEnabler 1.0.6、AppleMCEReporterDisabler、AMDRyzenCPUPowerManagement 0.7.2、SMCAMDProcessor、NootedRed、NVMeFix 1.1.3、RestrictEvents 1.1.6、VoodooPS2 2.3.7、VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput）、VoodooI2CHID、BrightnessKeys 1.0.3、AppleALC 1.9.8、SimpleHDA 1.0.0、YogaSMC 1.5.3、IntelBluetoothFirmware、IntelBTPatcher、BlueToolFixup 2.7.2、AirportItlwm-Tahoe、RyzenHV。
 
 SimpleHDA 与 AirportItlwm-Tahoe 限定 Darwin 25.x。SimpleHDA 位于 Lilu、AppleALC 之后。
 
@@ -143,6 +143,7 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 | ForgedInvariant | 1.5.0 | [ChefKissInc/ForgedInvariant](https://github.com/ChefKissInc/ForgedInvariant) |
 | SimpleHDA | 1.0.0 | [laobamac/SimpleHDA](https://github.com/laobamac/SimpleHDA) |
 | VoodooI2C / VoodooI2CHID | 2.8 | [VoodooI2C](https://github.com/VoodooI2C/VoodooI2C) |
+| RyzenHV | 本机启用 | AMD-V 上的 Hypervisor.framework；boot-args 含 `rhv_*` |
 | YogaSMC | 1.5.3 | [zhen-zen/YogaSMC](https://github.com/zhen-zen/YogaSMC) |
 | AMD 内核补丁 | PR #215 @ `a174cca` | [AMD-OSX/AMD_Vanilla#215](https://github.com/AMD-OSX/AMD_Vanilla/pull/215) |
 | HfsPlus.efi | OcBinaryData master | [acidanthera/OcBinaryData](https://github.com/acidanthera/OcBinaryData) |
@@ -228,6 +229,16 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 GPE `0x19` 因此不会被武装。扩展坞可以保持插入。交流电源仍是 `womp 0`。开盖和电源键不走这两颗控制器。
 
 **是否通用。** 只适用于 `\_SB.PCI0.GP17.XHC0` / `XHC1`，且电源管理能力在配置空间偏移 80 的机器。`_PTS` 的方法标志不是 `01`，或 `_PRW` 字节对不上时，OpenCore 日志里对应 Count 为 0，那一条没有生效。`0x03` 与 `0x04` 两条里只有实际存在的那条 Count 大于 0。
+
+### 3.9 触摸板偶发失灵：`VoodooInput` 未作为库启动
+
+**现象。** I2C 触摸板设备、`VoodooI2C`、`VoodooI2CHID` 都在，IORegistry 里 `VoodooI2CNativeEngine` 已标 `VoodooInputSupported`，但没有光标。`me.kishorprins.VoodooInput` 未启动，或只链进内核却未挂到 `NativeEngine`。
+
+**根因。** 在 Tahoe 上，仅把 `VoodooInput` 作为 OpenCore 插件单独注入时，有时不会真正启动并注册匹配规则。触摸板节点出现后不会补匹配，表现为随机某次开机后持续失灵；改回旧 EFI 也不一定恢复。
+
+**改动。** `VoodooInput.kext` 的 `Info.plist` 增加 `OSBundleCompatibleVersion = 1.0`；`VoodooI2C.kext` 的 `OSBundleLibraries` 增加 `me.kishorprins.VoodooInput = 1.0`。OpenCore 仍注入 `VoodooI2C.kext/Contents/PlugIns/VoodooInput.kext`，且排在 `VoodooI2C` 之前。内核加载 I2C 驱动时会先拉起 `VoodooInput`。
+
+**是否通用。** 使用 VoodooI2C + 插件版 VoodooInput、且在较新 macOS 上出现“设备在、光标无”的机器可同样处理。不要只把 `VoodooInput` 放进 `/Library/Extensions` 指望辅助内核集合加载：未批准的第三方扩展会被 `syspolicyd` 拦下，并可能导致整份辅助集合被卸掉。
 
 ## 目录
 
