@@ -136,19 +136,19 @@
   },
   {
     "repo": "steve12311/NootedRed",
-    "tag": "v0.9.0-pre-release.11",
-    "asset": "NootedRed-0.9.0-RELEASE-CacheSectionRepair.zip",
-    "url": "https://github.com/steve12311/NootedRed/releases/download/v0.9.0-pre-release.11/NootedRed-0.9.0-RELEASE-CacheSectionRepair.zip",
-    "sha256": "de2e739c26226d8701911edea00b541eff0e95b1bcce34859c2db145e3baf647",
+    "tag": "v0.9.0-pre-release.15",
+    "asset": "NootedRed-0.9.0-RELEASE.zip",
+    "url": "https://github.com/steve12311/NootedRed/releases/download/v0.9.0-pre-release.15/NootedRed-0.9.0-RELEASE.zip",
+    "sha256": "0028a1bc9b4ce7bd0c33298a73e62aa3f3f8d5374a8159b1294dedec45be91ba",
     "github_digest_verified": true,
     "prerelease": false
   },
   {
     "repo": "steve12311/NootedRed",
-    "tag": "v0.9.0-pre-release.11",
+    "tag": "v0.9.0-pre-release.15",
     "asset": "SHA256SUMS",
-    "url": "https://github.com/steve12311/NootedRed/releases/download/v0.9.0-pre-release.11/SHA256SUMS",
-    "sha256": "3f6d3fe83b49802f58132cec339fdcec21ddc63248eaed9cfa2d016dc310a954",
+    "url": "https://github.com/steve12311/NootedRed/releases/download/v0.9.0-pre-release.15/SHA256SUMS",
+    "sha256": "d8b886714f43874e1d0747d39b9b2ca21447dc03f83610d59347fd98f78f5726",
     "github_digest_verified": null,
     "prerelease": false
   },
