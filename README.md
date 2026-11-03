@@ -16,7 +16,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | --- | --- |
 | OpenCore | 1.0.8 RELEASE（`BOOTx64.efi`、`OpenCore.efi`、`OpenRuntime.efi`、`OpenCanopy.efi`、`ResetNvramEntry.efi`） |
 | `HfsPlus.efi` | acidanthera/OcBinaryData |
-| `boot-args` | `keepsyms=1 -FIPeriodic -NRedDisplayFix -NRedVideoFix` |
+| `boot-args` | `keepsyms=1 -FIPeriodic -NRedDisplayFix -NRedVideoFix rhv_enable_svm=1 rhv_allow_users=1 amfi_get_out_of_my_way=0x1 rhv_hv=1` |
 | `Misc.Debug.Target` | `0` |
 | `AppleDebug` / `LogModules` | `false` / 空 |
 | `DisplayLevel` | `2147483650` |
@@ -28,7 +28,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | `csr-active-config` | `430A0000` |
 | SMBIOS | `MacBookPro16,2`。`SystemSerialNumber`、`MLB` 为空，`SystemUUID` 与 `ROM` 为全 0 |
 
-`keepsyms=1` 供 SimpleHDA 使用。`-FIPeriodic` 做 TSC 周期同步。`-NRedDisplayFix -NRedVideoFix` 属于当前这份 NootedRed。
+`keepsyms=1` 供 SimpleHDA 使用。`-FIPeriodic` 做 TSC 周期同步。`-NRedDisplayFix -NRedVideoFix` 属于当前这份 NootedRed。`rhv_enable_svm=1` 打开 AMD-V，`rhv_allow_users=1` 允许普通用户使用虚拟化，`rhv_hv=1` 由 RyzenHV 提供 Hypervisor.framework，`amfi_get_out_of_my_way=0x1` 放宽 AMFI。
 
 写入本机 EFI 前填写序列号、MLB、UUID，ROM 填网卡 MAC 的 6 字节。使用 iCloud / iMessage 前，到 [Apple 保修查询](https://checkcoverage.apple.com/) 确认序列号显示“无效”。
 
@@ -56,7 +56,8 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | USB | 正常 | XHC0 / XHC1 原生枚举，未使用 USBMap |
 | 摄像头 | 正常 | 系统自带 USB 视频 |
 | 睡眠 | 内存睡眠 | `hibernatemode 0`。扩展坞保持插入时，`SSDT-XHCW` 去掉 `XHC0`/`XHC1`/`GP17` 的 `_PRW`，并在 `_PTS` 里清掉 PME，见 3.8。休眠到磁盘后再唤醒的固件映射未改 |
-| 内置 NVMe | 可用，速率不足 | Fanxiang 能启动。链路停在 5.0 GT/s x4，见 3.5 |
+| 内置 NVMe | 正常 | Fanxiang。顺序读约 3600 MB/s，写约 2600 MB/s，见 3.5 |
+| Docker | 正常 | RyzenHV 0.7.8，原生模式 `rhv_hv=1` |
 | 有线网 | 无此硬件 | `NullEthernet` 与 `SSDT-RMNE` 关闭，AX200 作为 `en0` |
 
 重启前先拔扩展坞，系统把无线登记为 `en0`；之后再插入，扩展坞排在 `en0` 后面。
@@ -143,7 +144,7 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 | ForgedInvariant | 1.5.0 | [ChefKissInc/ForgedInvariant](https://github.com/ChefKissInc/ForgedInvariant) |
 | SimpleHDA | 1.0.0 | [laobamac/SimpleHDA](https://github.com/laobamac/SimpleHDA) |
 | VoodooI2C / VoodooI2CHID | 2.8 | [VoodooI2C](https://github.com/VoodooI2C/VoodooI2C) |
-| RyzenHV | 本机启用 | AMD-V 上的 Hypervisor.framework；boot-args 含 `rhv_*` |
+| RyzenHV | 0.7.8 | AMD-V 上的 Hypervisor.framework。本机 Docker 正常 |
 | YogaSMC | 1.5.3 | [zhen-zen/YogaSMC](https://github.com/zhen-zen/YogaSMC) |
 | AMD 内核补丁 | PR #215 @ `a174cca` | [AMD-OSX/AMD_Vanilla#215](https://github.com/AMD-OSX/AMD_Vanilla/pull/215) |
 | HfsPlus.efi | OcBinaryData master | [acidanthera/OcBinaryData](https://github.com/acidanthera/OcBinaryData) |
@@ -188,11 +189,11 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 
 **是否通用。** 只针对本机与这一构建。
 
-### 3.5 内置盘停在 PCIe 2.0
+### 3.5 内置 NVMe
 
-**根因。** GPP6 与 Fanxiang 都声明 8.0 GT/s，协商结果是 5.0 GT/s x4。限制在 macOS 驱动之下，位于固件或链路训练。不经缓存读写 4 GB 约 2.0 GB/s，即 PCIe 2.0 x4 的上限。盘可以作为系统盘。
+**现状。** GPP6 上的 Fanxiang 作系统盘。顺序读约 3600 MB/s，写约 2600 MB/s。这条插槽是 PCIe 3.0 x4（8.0 GT/s），有效载荷上限约 3.94 GB/s。读速顶到这条上限，写速由颗粒决定。
 
-**改动。** 该插槽不注入 `built-in`、`class-code`、`ps-max-latency-us`。NVMeFix 1.1.3 开启。速率保持 5.0 GT/s。
+**改动。** 该插槽不注入 `built-in`、`class-code`、`ps-max-latency-us`。NVMeFix 1.1.3 开启。
 
 **是否通用。** 只针对本机 GPP6 与当前 BIOS。
 
