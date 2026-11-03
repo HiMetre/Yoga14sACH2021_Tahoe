@@ -47,7 +47,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | 外接显示器音频 | 无输出 | 音频设备会建立，链路上没有有效数据。内置扬声器不受影响 |
 | 无线 AX200 | 正常，功能受限 | AirportItlwm-Tahoe。Wi-Fi 6、纯 WPA3、强制 PMF、AirDrop 不可用 |
 | 蓝牙 | 已加载，启动无 panic | IntelBluetoothFirmware / IntelBTPatcher 2.4.0 + BlueToolFixup 2.7.2 |
-| 触摸板 | 正常 | VoodooI2C 2.8。`YogaSMC.kext` 必须保持启用，否则 `VoodooInput` 不加载 |
+| 触摸板 | 正常 | VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput、VoodooI2CHID） |
 | 键盘 | 正常 | VoodooPS2Controller 2.3.7。OpenCanopy 超时 3 秒，固件菜单只接受 USB 键盘 |
 | Fn+Q 性能模式 | 正常 | YogaSMC 转发 VPC 事件，YogaControl 接收 |
 | 键盘背光 | 仅硬件键 | Fn+空格。YogaSMC 报告本机不支持软件切换 |
@@ -55,7 +55,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | 性能模式功耗 | 正常 | DYTC rev 5。短时满载：安静约 12 W / 1.5 GHz，均衡约 24 W / 2.7 GHz，性能约 40 W / 3.7 GHz。机身热透后性能模式持续约 32–36 W / 2.4–2.7 GHz（约 86 °C）。封装功耗含核显 |
 | USB | 正常 | XHC0 / XHC1 原生枚举，未使用 USBMap |
 | 摄像头 | 正常 | 系统自带 USB 视频 |
-| 睡眠 | 内存睡眠 | `hibernatemode 0`。扩展坞保持插入时，`SSDT-XHCW` 去掉 `XHC0`/`XHC1`/`GP17` 的 `_PRW`，并在 `_PTS` 里清掉 PME，见 3.9。休眠到磁盘后再唤醒的固件映射未改 |
+| 睡眠 | 内存睡眠 | `hibernatemode 0`。扩展坞保持插入时，`SSDT-XHCW` 去掉 `XHC0`/`XHC1`/`GP17` 的 `_PRW`，并在 `_PTS` 里清掉 PME，见 3.8。休眠到磁盘后再唤醒的固件映射未改 |
 | 内置 NVMe | 可用，速率不足 | Fanxiang 能启动。链路停在 5.0 GT/s x4，见 3.5 |
 | 有线网 | 无此硬件 | `NullEthernet` 与 `SSDT-RMNE` 关闭，AX200 作为 `en0` |
 
@@ -195,15 +195,7 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 
 **是否通用。** 只针对本机 GPP6 与当前 BIOS。
 
-### 3.6 关闭 YogaSMC 后触摸板失灵
-
-**根因。** 本机这份 VoodooI2C 2.8 在 `YogaSMC.kext` 未加载时不会装上 `VoodooInput`。I2C 层仍有触摸数据，`VoodooI2CNativeEngine` 仍发布 `VoodooInputSupported`。
-
-**改动。** `YogaSMC.kext` 1.5.3 保持启用。性能模式界面使用 YogaControl。EC 路径是 `LPC0.EC0.VPC0`，不加载引用 `LPCB.H_EC` 的 `SSDT-ECRW`、`SSDT-RCSM`、`SSDT-YVPC`。快充命令固件不接受。
-
-**是否通用。** 只针对 VoodooI2C 2.8 与 YogaSMC 1.5.3 的这一组合。
-
-### 3.7 Tahoe 移除 AppleHDA 后没有声音
+### 3.6 Tahoe 移除 AppleHDA 后没有声音
 
 **根因。** Tahoe 删除了系统中的 AppleHDA，AppleALC 的布局无法单独出声。
 
@@ -211,7 +203,7 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 
 **是否通用。** AppleALC 加 SimpleHDA 可用于 Tahoe 上恢复 AppleHDA 布局。`layout-id = 13` 只对应本机 ALC287。HAL 与 library-validation 的冲突不限于这台机器。
 
-### 3.8 其余差异
+### 3.7 其余差异
 
 | 项 | 根因 | 改动 | 是否通用 |
 | --- | --- | --- | --- |
@@ -221,7 +213,7 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 | `npci=0x2000` | 该参数禁止 64 位 PCI 窗口。核显与 XHC 在 `GP17`（00:08.1）下、地址在 4 GB 以上 | 删除 | 4 GB 以上的核显或 USB 控制器都应去掉 |
 | 虚拟网卡 | 本机没有网口。虚拟网卡地址与 AX200 相同时接口不起 | 关闭 `NullEthernet.kext` 与 `SSDT-RMNE`，AX200 作为 `en0` | 无内置网口、且无线应作为 `en0` 的机器同样适用 |
 
-### 3.9 扩展坞把合盖睡眠反复唤醒，随后整机冻结
+### 3.8 扩展坞把合盖睡眠反复唤醒，随后整机冻结
 
 **根因。** 扩展坞挂在 `GP17` 下的 `XHC0`、`XHC1`。桥和两颗控制器的唤醒 GPE 都是 25（`0x19`），盖子不用这个 GPE。2026-11-03 20:58 合盖后连续睡了 96 分钟，22:34 由电源键唤醒。22:39 再次合盖，7 秒后被 `XHC0 / XHC1` 暗唤醒，之后大约每 4 分钟一次，到 03:39 共 62 次都回到了系统。03:40 进入下一次睡眠，03:44 的唤醒没有回到 `powerd`。08:00 强制重启，没有内核恐慌。`hibernatemode` 为 0。
 
