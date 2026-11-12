@@ -878,7 +878,7 @@
 				<key>BundlePath</key>
 				<string>IntelBluetoothFirmware.kext</string>
 				<key>Comment</key>
-				<string>V2.4.0 | IntelBluetoothFirmware.kext</string>
+				<string>V2.5.3 | lshbluesky IntelBluetoothFirmware | AX200 inquiry IO error on 2.4.0</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -896,7 +896,7 @@
 				<key>BundlePath</key>
 				<string>IntelBTPatcher.kext</string>
 				<key>Comment</key>
-				<string>V2.4.0 | IntelBTPatcher.kext</string>
+				<string>V2.5.3 | lshbluesky IntelBTPatcher | Tahoe LE length fix</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -932,7 +932,7 @@
 				<key>BundlePath</key>
 				<string>AirportItlwm-Tahoe.kext</string>
 				<key>Comment</key>
-				<string>V2.4.0 | laobamac 2.4.0-alpha-738d4c6 | native Tahoe Wi-Fi (AX200)</string>
+				<string>V2.4.0 | laobamac 2.4.0-alpha-7204c69 | native Tahoe Wi-Fi (AX200)</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>

@@ -46,7 +46,7 @@ OpenCore **1.0.8 RELEASE**。BIOS 为定制固件 GZCN27WW，因此不支持升�
 | 扬声器、麦克风 | 正常 | AppleALC 1.9.8 + SimpleHDA 1.0.0，`layout-id = 13`，普通 IOAudio。HAL 插件未安装 |
 | 外接显示器音频 | 无输出 | 音频设备会建立，链路上没有有效数据。内置扬声器不受影响 |
 | 无线 AX200 | 正常，功能受限 | AirportItlwm-Tahoe。Wi-Fi 6、纯 WPA3、强制 PMF、AirDrop 不可用 |
-| 蓝牙 | 已加载，启动无 panic | IntelBluetoothFirmware / IntelBTPatcher 2.4.0 + BlueToolFixup 2.7.2 |
+| 蓝牙 | 已加载。2.4.0 固件上经典搜索会失败并让「附近的设备」闪烁，见 3.10 | IntelBluetoothFirmware / IntelBTPatcher 2.5.3 + BlueToolFixup 2.7.2 |
 | 触摸板 | 正常 | VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput、VoodooI2CHID）。`VoodooInput` 须作为 `VoodooI2C` 的库依赖注入，见 3.9 |
 | 键盘 | 正常 | VoodooPS2Controller 2.3.7。OpenCanopy 超时 3 秒，固件菜单只接受 USB 键盘 |
 | Fn+Q 性能模式 | 正常 | YogaSMC 转发 VPC 事件，YogaControl 接收 |
@@ -70,7 +70,7 @@ DeviceProperties：`PciRoot(0x1)/Pci(0x8,0x1)/Pci(0x0,0x6)` 的 `layout-id = 13`
 
 启用的 kext，顺序同 `Kernel → Add`：
 
-Lilu 1.7.2、VirtualSMC / SMCBatteryManager / SMCLightSensor 1.3.8、ForgedInvariant 1.5.0、ECEnabler 1.0.6、AppleMCEReporterDisabler、AMDRyzenCPUPowerManagement 0.7.2、SMCAMDProcessor、NootedRed、NVMeFix 1.1.3、RestrictEvents 1.1.6、VoodooPS2 2.3.7、VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput）、VoodooI2CHID、BrightnessKeys 1.0.3、AppleALC 1.9.8、SimpleHDA 1.0.0、YogaSMC 1.5.3、IntelBluetoothFirmware、IntelBTPatcher、BlueToolFixup 2.7.2、AirportItlwm-Tahoe、RyzenHV。
+Lilu 1.7.2、VirtualSMC / SMCBatteryManager / SMCLightSensor 1.3.8、ForgedInvariant 1.5.0、ECEnabler 1.0.6、AppleMCEReporterDisabler、AMDRyzenCPUPowerManagement 0.7.2、SMCAMDProcessor、NootedRed、NVMeFix 1.1.3、RestrictEvents 1.1.6、VoodooPS2 2.3.7、VoodooI2C 2.8（VoodooGPIO、VoodooI2CServices、VoodooInput）、VoodooI2CHID、BrightnessKeys 1.0.3、AppleALC 1.9.8、SimpleHDA 1.0.0、YogaSMC 1.5.3、IntelBluetoothFirmware 2.5.3、IntelBTPatcher 2.5.3、BlueToolFixup 2.7.2、AirportItlwm-Tahoe、RyzenHV。
 
 SimpleHDA 与 AirportItlwm-Tahoe 限定 Darwin 25.x。SimpleHDA 位于 Lilu、AppleALC 之后。
 
@@ -126,12 +126,12 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 | 项 | 无线 | 蓝牙 |
 | --- | --- | --- |
 | 驱动 | AirportItlwm-Tahoe | IntelBluetoothFirmware、IntelBTPatcher、BlueToolFixup |
-| 版本 | 2.4.0-alpha，提交 `738d4c6` | 2.4.0；BlueToolFixup 2.7.2 |
-| 发布 | [laobamac/itlwm](https://github.com/laobamac/itlwm) | [OpenIntelWireless/IntelBluetoothFirmware 2.4.0](https://github.com/OpenIntelWireless/IntelBluetoothFirmware)、[acidanthera/BrcmPatchRAM 2.7.2](https://github.com/acidanthera/BrcmPatchRAM) |
+| 版本 | 2.4.0-alpha，提交 `7204c69` | 2.5.3；BlueToolFixup 2.7.2 |
+| 发布 | [laobamac/itlwm](https://github.com/laobamac/itlwm) | [lshbluesky/IntelBluetoothFirmware 2.5.3](https://github.com/lshbluesky/IntelBluetoothFirmware/releases/tag/v2.5.3)、[acidanthera/BrcmPatchRAM 2.7.2](https://github.com/acidanthera/BrcmPatchRAM) |
 | 界面 | 原生 Wi-Fi | 系统蓝牙栈 |
-| 内核范围 | Darwin 25.x | 官方 2.4.0 |
+| 内核范围 | Darwin 25.x | Tahoe 26 |
 
-同平台参考配置使用非官方蓝牙 2.5.0。本机固定官方 2.4.0。Wi-Fi 6 默认关闭，原因见 3.4。
+不加载 `IntelBluetoothInjector`。Wi-Fi 6 默认关闭，原因见 3.4。蓝牙版本更换的原因见 3.10。
 
 ### 2.3 其余第三方组件
 
@@ -149,7 +149,7 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 | AMD 内核补丁 | PR #215 @ `a174cca` | [AMD-OSX/AMD_Vanilla#215](https://github.com/AMD-OSX/AMD_Vanilla/pull/215) |
 | HfsPlus.efi | OcBinaryData master | [acidanthera/OcBinaryData](https://github.com/acidanthera/OcBinaryData) |
 
-13 个 Release 包的 SHA-256 与 GitHub 记录一致。NootedRed 与作者附带的 `SHA256SUMS` 一致。VoodooPS2 2.3.7、BrightnessKeys 1.0.3、IntelBluetooth 2.4.0 的发布页没有摘要，`components.json` 中为本地计算值。
+13 个 Release 包的 SHA-256 与 GitHub 记录一致。NootedRed 与作者附带的 `SHA256SUMS` 一致。VoodooPS2 2.3.7、BrightnessKeys 1.0.3、IntelBluetooth 2.5.3 的发布页没有摘要，`components.json` 中为本地计算值。
 
 `efi_init` 不在上表中。它是写在 `config.plist` 里的本机内核补丁，没有独立源文件。
 
@@ -183,7 +183,7 @@ AX200 是组合卡。无线和蓝牙来自两个项目。
 
 ### 3.4 打开 Wi-Fi 6 后登录界面全黑
 
-**根因。** 这份 AirportItlwm-Tahoe（`738d4c6`）在本机打开 HE 后，登录界面无画面。指针仍可用，内核没有 panic。
+**根因。** `738d4c6` 在本机打开 HE 后，登录界面无画面。指针仍可用，内核没有 panic。当前 kext 已换到 `7204c69`，HE 仍不开启，等这次构建单独验证过再考虑。
 
 **改动。** 不设置 `itlwm_he`。无 Wi-Fi 6，也不支持纯 WPA3、强制 PMF 和 AirDrop。
 
@@ -240,6 +240,14 @@ GPE `0x19` 因此不会被武装。扩展坞可以保持插入。交流电源仍
 **改动。** `VoodooInput.kext` 的 `Info.plist` 增加 `OSBundleCompatibleVersion = 1.0`；`VoodooI2C.kext` 的 `OSBundleLibraries` 增加 `me.kishorprins.VoodooInput = 1.0`。OpenCore 仍注入 `VoodooI2C.kext/Contents/PlugIns/VoodooInput.kext`，且排在 `VoodooI2C` 之前。内核加载 I2C 驱动时会先拉起 `VoodooInput`。
 
 **是否通用。** 使用 VoodooI2C + 插件版 VoodooInput、且在较新 macOS 上出现“设备在、光标无”的机器可同样处理。不要只把 `VoodooInput` 放进 `/Library/Extensions` 指望辅助内核集合加载：未批准的第三方扩展会被 `syspolicyd` 拦下，并可能导致整份辅助集合被卸掉。
+
+### 3.10 系统设置「附近的设备」疯狂闪烁
+
+**根因。** 打开这一页会发起连续的经典蓝牙搜索。本机 AX200 在 IntelBluetoothFirmware 2.4.0 下，搜索命令 `HCI Inquiry` 立刻以传输错误 `STATUS 1205`（`OI_HCITRANS_IO_ERROR`）失败。`bluetoothd` 把失败当成搜索结束，因为会话仍要求连续搜索，马上再搜一次。2026-11-04 22:01 大约 10 秒内重复了 18720 次，设置页每次开始和结束都重画列表。控制器本身保持开启，读地址等短命令正常。BlueToolFixup 2.7.2 和两条蓝牙 NVRAM 已经就位，不是缺这两项。
+
+**改动。** `IntelBluetoothFirmware.kext` 与 `IntelBTPatcher.kext` 换为 lshbluesky 2.5.3。其中包含 2.5.1 更新过的 AX200 固件，以及 26.5 之后的 LE 补丁。不加入 `IntelBluetoothInjector.kext`。无线仍用现有的 AirportItlwm-Tahoe。
+
+**是否通用。** 适用于 Tahoe 上用官方 2.4.0 蓝牙固件、经典搜索报 1205 的 AX200。需要重启后新固件才会上传。重启后若固件版本仍是 `v256 c256`，说明启动分区里的 kext 没有换上。
 
 ## 目录
 

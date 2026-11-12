@@ -108,20 +108,20 @@
     "prerelease": false
   },
   {
-    "repo": "OpenIntelWireless/IntelBluetoothFirmware",
-    "tag": "v2.4.0",
-    "asset": "IntelBluetooth-v2.4.0.zip",
-    "url": "https://github.com/OpenIntelWireless/IntelBluetoothFirmware/releases/download/v2.4.0/IntelBluetooth-v2.4.0.zip",
-    "sha256": "78418daa11f620012fc53ba68cbd643c2642a45f2f96c594fd01aaf2bc68fe2b",
+    "repo": "lshbluesky/IntelBluetoothFirmware",
+    "tag": "v2.5.3",
+    "asset": "IntelBluetooth-2.5.3-RELEASE.zip",
+    "url": "https://github.com/lshbluesky/IntelBluetoothFirmware/releases/download/v2.5.3/IntelBluetooth-2.5.3-RELEASE.zip",
+    "sha256": "8ae1cad6edf39f524bf5a106b88a2ddfd27744c12612f631b451d4017ff8b70b",
     "github_digest_verified": null,
     "prerelease": false
   },
   {
     "repo": "laobamac/itlwm",
     "tag": "v2.4.0-alpha",
-    "asset": "AirportItlwm-Tahoe-v2.4.0-RELEASE-alpha-738d4c6.zip",
-    "url": "https://github.com/laobamac/itlwm/releases/download/v2.4.0-alpha/AirportItlwm-Tahoe-v2.4.0-RELEASE-alpha-738d4c6.zip",
-    "sha256": "25680aa39ddd79b205141875b261bdcc28bea150d13f27787b3c215555daa00f",
+    "asset": "AirportItlwm-Tahoe-v2.4.0-RELEASE-alpha-7204c69.zip",
+    "url": "https://github.com/laobamac/itlwm/releases/download/v2.4.0-alpha/AirportItlwm-Tahoe-v2.4.0-RELEASE-alpha-7204c69.zip",
+    "sha256": "a5d098e6752592435c021aa6e8d08c64ee6aab9f2786660a6c72d7af1218fcf9",
     "github_digest_verified": true,
     "prerelease": false
   },
